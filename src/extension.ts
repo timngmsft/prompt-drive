@@ -130,7 +130,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Handle double-click on prompt files
     treeView.onDidChangeSelection(async (event) => {
         if (event.selection.length === 1) {
-            const selectedItem = event.selection[0];
+            const selectedItem = event.selection[0] as PromptDriveItem;
             if (!selectedItem.isDirectory) {
                 // Open the file in the editor when selected
                 const document = await vscode.workspace.openTextDocument(selectedItem.resourceUri);
