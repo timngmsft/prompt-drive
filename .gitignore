@@ -1,0 +1,28 @@
+# TypeScript output directory
+out/
+dist/
+
+# Node dependencies
+node_modules/
+
+# VS Code files
+.vscode-test/
+*.vsix
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# TypeScript cache
+*.tsbuildinfo
+
+# System files
+.DS_Store
+Thumbs.db

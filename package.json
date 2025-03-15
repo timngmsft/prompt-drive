@@ -1,0 +1,104 @@
+{
+  "name": "prompt-drive",
+  "displayName": "PromptDrive",
+  "description": "A VS Code extension to manage and send prompts to Copilot",
+  "version": "0.1.0",
+  "publisher": "user",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "prompt-drive",
+          "title": "Prompt Drive",
+          "icon": "resources/notes-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "prompt-drive": [
+        {
+          "id": "promptDriveExplorer",
+          "name": "Prompts"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "promptDrive.sendToCopilot",
+        "title": "Send to Copilot"
+      },
+      {
+        "command": "promptDrive.refreshEntry",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "promptDrive.createPrompt",
+        "title": "New Prompt",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "promptDrive.createFolder",
+        "title": "New Folder",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "promptDrive.deleteEntry",
+        "title": "Delete",
+        "icon": "$(trash)"
+      }
+    ],
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "promptDrive.sendToCopilot",
+          "when": "view == promptDriveExplorer && viewItem == prompt",
+          "group": "inline"
+        },
+        {
+          "command": "promptDrive.deleteEntry",
+          "when": "view == promptDriveExplorer"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "promptDrive.refreshEntry",
+          "when": "view == promptDriveExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "promptDrive.createPrompt",
+          "when": "view == promptDriveExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "promptDrive.createFolder",
+          "when": "view == promptDriveExplorer",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/vscode": "^1.98.0",
+    "typescript": "^5.8.2",
+    "vscode": "^1.1.37"
+  }
+}
