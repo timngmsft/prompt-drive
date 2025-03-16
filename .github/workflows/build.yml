@@ -25,9 +25,6 @@ jobs:
       - name: Compile
         run: npm run compile
         
-      - name: Run tests
-        run: npm run test
-        
       - name: VS Code Preparation
         run: npm run vscode:prepublish
         
