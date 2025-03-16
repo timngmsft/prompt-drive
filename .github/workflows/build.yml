@@ -1,0 +1,47 @@
+name: Build on PR Merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Lint
+        run: npm run lint
+        
+      - name: Compile
+        run: npm run compile
+        
+      - name: Run tests
+        run: npm run test
+        
+      - name: VS Code Preparation
+        run: npm run vscode:prepublish
+        
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+        
+      - name: Build VSIX
+        run: vsce package
+        
+      - name: Upload VSIX
+        uses: actions/upload-artifact@v3
+        with:
+          name: prompt-drive-extension
+          path: "*.vsix"
