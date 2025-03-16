@@ -102,25 +102,8 @@ export function activate(context: vscode.ExtensionContext) {
             if (!item || item.isDirectory) return;
 
             try {
-                const content = fs.readFileSync(item.resourceUri.fsPath, 'utf8');
-                
-                // Find Copilot Chat or Edits panel and send the content
-                await vscode.commands.executeCommand('workbench.action.quickOpen', '>Copilot');
-                
-                // Wait a moment for the quickOpen to show
-                setTimeout(() => {
-                    // Simulate typing and pressing Enter to send to Copilot
-                    const copilotContent = content.trim();
-                    vscode.env.clipboard.writeText(copilotContent);
-                    
-                    // Execute paste command
-                    vscode.commands.executeCommand('editor.action.clipboardPasteAction').then(() => {
-                        // Press Enter to send the content
-                        vscode.commands.executeCommand('acceptSelectedSuggestion');
-                    });
-                }, 500);
-                
-                vscode.window.showInformationMessage('Sent prompt to Copilot');
+                const content = fs.readFileSync(item.resourceUri.fsPath, 'utf8').trim()
+                await vscode.commands.executeCommand('workbench.action.chat.open', content);
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to send to Copilot: ${error}`);
             }
