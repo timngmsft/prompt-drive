@@ -79,7 +79,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('promptDrive.deleteEntry', async (item: PromptDriveItem) => {
-            if (!item) return;
+            if (!item) {return;}
 
             const fileName = path.basename(item.resourceUri.fsPath);
             const confirmMessage = `Are you sure you want to delete ${fileName}?`;
@@ -99,10 +99,10 @@ export function activate(context: vscode.ExtensionContext) {
     // Command to send prompt content to Copilot
     context.subscriptions.push(
         vscode.commands.registerCommand('promptDrive.sendToCopilot', async (item: PromptDriveItem) => {
-            if (!item || item.isDirectory) return;
+            if (!item || item.isDirectory) {return;}
 
             try {
-                const content = fs.readFileSync(item.resourceUri.fsPath, 'utf8').trim()
+                const content = fs.readFileSync(item.resourceUri.fsPath, 'utf8').trim();
                 await vscode.commands.executeCommand('workbench.action.chat.open', content);
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to send to Copilot: ${error}`);
