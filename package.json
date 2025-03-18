@@ -31,6 +31,21 @@
         }
       ]
     },
+    "configuration": {
+      "title": "Prompt Drive",
+      "properties": {
+        "promptDrive.enableUserPromptDrive": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable user Prompt Drive ($HOME/.promptDrive)"
+        },
+        "promptDrive.useRepositoryPromptDrive": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use repository Prompt Drive if present"
+        }
+      }
+    },
     "commands": [
       {
         "command": "promptDrive.sendToCopilot",
