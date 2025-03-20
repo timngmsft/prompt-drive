@@ -1,9 +1,9 @@
 {
   "name": "prompt-drive",
-  "displayName": "PromptDrive",
-  "description": "A VS Code extension to manage and send prompts to Copilot",
+  "displayName": "Prompt Drive",
+  "description": "A Visual Studio Code extension to manage and send prompts to Copilot",
   "version": "0.1.0",
-  "publisher": "user",
+  "publisher": "timngmsft",
   "icon": "resources/icon.png",
   "repository": {
     "type": "git",
