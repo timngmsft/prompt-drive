@@ -3,7 +3,7 @@
   "displayName": "Prompt Drive",
   "description": "A Visual Studio Code extension to manage and send prompts to Copilot",
   "version": "0.1.0",
-  "publisher": "timngmsft",
+  "publisher": "therealtng",
   "icon": "resources/icon.png",
   "repository": {
     "type": "git",
