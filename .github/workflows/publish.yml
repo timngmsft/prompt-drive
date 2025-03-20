@@ -12,6 +12,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Add permissions needed for GitHub releases
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,7 +33,21 @@ jobs:
         
       - name: Set specific version
         if: ${{ github.event.inputs.version != 'patch' && github.event.inputs.version != 'minor' && github.event.inputs.version != 'major' }}
-        run: npm version ${{ github.event.inputs.version }} --no-git-tag-version --allow-same-version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          # Count the number of dots to determine version format
+          NUM_DOTS=$(echo "$VERSION" | tr -cd '.' | wc -c)
+          
+          # Add missing .0 if needed to make it a valid semver (x.y.z)
+          if [ "$NUM_DOTS" -eq "0" ]; then
+            VERSION="$VERSION.0.0"
+            echo "Converting to $VERSION"
+          elif [ "$NUM_DOTS" -eq "1" ]; then
+            VERSION="$VERSION.0"
+            echo "Converting to $VERSION"
+          fi
+          
+          npm version $VERSION --no-git-tag-version --allow-same-version
         
       - name: Install vsce
         run: npm install -g @vscode/vsce
@@ -44,18 +61,19 @@ jobs:
       - name: Publish Extension
         run: vsce publish -p ${{ secrets.VSCE_PAT }}
         
+      # Extract version BEFORE using it in GitHub release
+      - name: Extract version
+        id: get-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ env.NEW_VERSION }}
-          name: Release v${{ env.NEW_VERSION }}
+          tag_name: v${{ steps.get-version.outputs.version }}
+          name: Release v${{ steps.get-version.outputs.version }}
+          generate_release_notes: true
           draft: false
           prerelease: false
           files: "*.vsix"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEW_VERSION: ${{ steps.get-version.outputs.version }}
-        
-      - name: Extract version
-        id: get-version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
