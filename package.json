@@ -5,6 +5,17 @@
   "version": "0.1.0",
   "publisher": "user",
   "icon": "resources/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/timngmsft/prompt-drive.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "copilot",
+    "prompt",
+    "productivity",
+    "ai"
+  ],
   "engines": {
     "vscode": "^1.98.0"
   },
