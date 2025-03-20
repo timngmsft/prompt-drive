@@ -32,9 +32,21 @@ Prompt files are stored locally in a `.promptDrive` folder in your home director
 
 ## Requirements
 
-- Visual Studio Code 1.60.0 or higher
+- Visual Studio Code 1.98.0 or higher
 - GitHub Copilot extension installed and configured
 
 ## Extension Settings
 
-This extension has no configurable settings yet.
+This extension provides the following settings:
+
+* `promptDrive.enableUserPromptDrive`: Enable user Prompt Drive ($HOME/.promptDrive)
+* `promptDrive.useRepositoryPromptDrive`: Use repository Prompt Drive if present
+
+## Release Notes
+
+### 0.1.0
+
+Initial release of PromptDrive:
+- Support for organizing and managing prompt files
+- Send prompts to Copilot
+- User and repository prompt storage options
