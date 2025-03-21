@@ -84,11 +84,13 @@ export class PromptDriveTreeDataProvider implements vscode.TreeDataProvider<Prom
     private settings: PromptDriveSettings;
     private userBasePath: string;
     private repoBasePath: string | null = null;
+    private gitRepoRoot: string | null = null;
 
-    constructor(userBasePath: string, repoBasePath?: string) {
+    constructor(userBasePath: string, repoBasePath?: string, gitRepoRoot?: string) {
         this.settings = PromptDriveSettings.getInstance();
         this.userBasePath = userBasePath;
         this.repoBasePath = repoBasePath || null;
+        this.gitRepoRoot = gitRepoRoot || null;
         
         // Listen for settings changes
         vscode.workspace.onDidChangeConfiguration(e => {
@@ -100,6 +102,15 @@ export class PromptDriveTreeDataProvider implements vscode.TreeDataProvider<Prom
 
     refresh(): void {
         this._onDidChangeTreeData.fire();
+    }
+
+    /**
+     * Update the repository path and git repository root
+     * Called when workspace folders change
+     */
+    updateRepositoryPath(repoPath?: string, gitRepoRoot?: string): void {
+        this.repoBasePath = repoPath || null;
+        this.gitRepoRoot = gitRepoRoot || null;
     }
 
     getTreeItem(element: PromptDriveItem): vscode.TreeItem {
@@ -115,13 +126,14 @@ export class PromptDriveTreeDataProvider implements vscode.TreeDataProvider<Prom
                 rootNodes.push(new RootNode('USER', this.userBasePath));
             }
             
-            if (this.settings.useRepositoryPromptDrive && this.repoBasePath && fs.existsSync(this.repoBasePath)) {
-                rootNodes.push(new RootNode('REPOSITORY', this.repoBasePath));
+            // Only show REPOSITORY node if we're in a Git repository
+            if (this.settings.useRepositoryPromptDrive && this.gitRepoRoot) {
+                rootNodes.push(new RootNode('REPOSITORY', this.repoBasePath!));
             }
             
             return rootNodes;
         } else if (element instanceof RootNode) {
-            // Children of a root node
+            // Children of a root node - may need to create directory if it doesn't exist
             return this.getPromptDriveItems(element.basePath);
         } else if (element.isDirectory) {
             // Children of a directory
@@ -132,33 +144,41 @@ export class PromptDriveTreeDataProvider implements vscode.TreeDataProvider<Prom
     }
 
     private async getPromptDriveItems(directoryPath: string): Promise<PromptDriveItem[]> {
+        // If directory doesn't exist, return empty array
+        // The directory will be created when a prompt or folder is added
         if (!fs.existsSync(directoryPath)) {
             return [];
         }
 
-        const entries = fs.readdirSync(directoryPath);
-        const items: PromptDriveItem[] = [];
-        
-        for (const entry of entries) {
-            const entryPath = path.join(directoryPath, entry);
-            const isDirectory = fs.statSync(entryPath).isDirectory();
-            const uri = vscode.Uri.file(entryPath);
+        try {
+            const entries = fs.readdirSync(directoryPath);
+            const items: PromptDriveItem[] = [];
             
-            // Add all directories and only .prompt files
-            if (isDirectory || entry.endsWith('.prompt')) {
-                items.push(new PromptDriveItem(uri, isDirectory));
+            for (const entry of entries) {
+                const entryPath = path.join(directoryPath, entry);
+                const isDirectory = fs.statSync(entryPath).isDirectory();
+                const uri = vscode.Uri.file(entryPath);
+                
+                // Add all directories and only .prompt files
+                if (isDirectory || entry.endsWith('.prompt')) {
+                    items.push(new PromptDriveItem(uri, isDirectory));
+                }
             }
-        }
 
-        // Sort: directories first, then files
-        return items.sort((a, b) => {
-            if (a.isDirectory && !b.isDirectory) {
-                return -1;
-            }
-            if (!a.isDirectory && b.isDirectory) {
-                return 1;
-            }
-            return a.label!.localeCompare(b.label!);
-        });
+            // Sort: directories first, then files
+            return items.sort((a, b) => {
+                if (a.isDirectory && !b.isDirectory) {
+                    return -1;
+                }
+                if (!a.isDirectory && b.isDirectory) {
+                    return 1;
+                }
+                return a.label!.localeCompare(b.label!);
+            });
+        } catch (error) {
+            // Handle errors gracefully
+            console.error(`Error reading directory ${directoryPath}:`, error);
+            return [];
+        }
     }
 }
