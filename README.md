@@ -1,6 +1,10 @@
 # Prompt Drive
 
-A Visual Studio Code extension for managing and sending prompts to Copilot.
+A Visual Studio Code extension for managing and sending prompts to Copilot. This extension allows you to save your favorite prompts in either:
+* Your home folder (~/.promptDrive)
+* Your repository's folder ([repoDir]/.promptDrive)
+
+You can save prompts, manage them, edit them, and then send them to GitHub Copilot Chat / Edit.
 
 ## Features
 
@@ -28,7 +32,7 @@ A Visual Studio Code extension for managing and sending prompts to Copilot.
 
 ## Storage
 
-Prompt files are stored locally in a `.promptDrive` folder in your home directory.
+Prompt files are stored locally in a `.promptDrive` folder in your home directory or your repository directory.
 
 ## Requirements
 
