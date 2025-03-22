@@ -37,7 +37,58 @@ function findGitRepositoryRoot(folderPath: string): string | undefined {
     }
 }
 
+/**
+ * Shows the README file when the extension is first installed
+ * @param context Extension context
+ */
+async function showReadmeOnFirstInstall(context: vscode.ExtensionContext): Promise<void> {
+    // Check if the welcome has been shown before
+    const hasShownReadme = context.globalState.get('promptDrive.hasShownReadme');
+    
+    if (!hasShownReadme) {
+        // Get the path to the README file in the extension directory
+        const readmePath = path.join(context.extensionPath, 'README.md');
+        
+        try {
+            if (fs.existsSync(readmePath)) {
+                // First close all editors to start with a clean slate
+                // await vscode.commands.executeCommand('workbench.action.closeAllEditors');
+                
+                // Open the document - we need to load it first
+                const doc = await vscode.workspace.openTextDocument(readmePath);
+                
+                // Directly show the markdown preview in the current editor group
+                await vscode.commands.executeCommand('markdown.showPreview', vscode.Uri.file(readmePath));
+                
+                // Also show the walkthrough
+                // vscode.commands.executeCommand('workbench.action.openWalkthrough', 'promptDrive.promptDriveWalkthrough');
+                
+                // Mark that we've shown the README
+                await context.globalState.update('promptDrive.hasShownReadme', true);
+            }
+        } catch (error) {
+            console.error('Error showing README:', error);
+        }
+    }
+}
+
+/**
+ * Shows the walkthrough for the extension
+ */
+function showWalkthrough(): void {
+    // Execute the command to open the walkthrough
+    vscode.commands.executeCommand('workbench.action.openWalkthrough', 'promptDrive.promptDriveWalkthrough');
+}
+
 export function activate(context: vscode.ExtensionContext) {
+    // Show README on first install
+    showReadmeOnFirstInstall(context);
+
+    // Register command to show walkthrough
+    context.subscriptions.push(
+        vscode.commands.registerCommand('promptDrive.showWalkthrough', showWalkthrough)
+    );
+
     // Ensure the settings singleton is initialized
     const settings = PromptDriveSettings.getInstance();
 
