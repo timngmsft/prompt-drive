@@ -59,8 +59,12 @@
     },
     "commands": [
       {
-        "command": "promptDrive.sendToCopilot",
-        "title": "Send to Copilot"
+        "command": "promptDrive.sendToCopilotAskMode",
+        "title": "Send to Copilot (Ask Mode)"
+      },
+      {
+        "command": "promptDrive.sendToCopilotAgentMode",
+        "title": "Send to Copilot (Agent Mode)"
       },
       {
         "command": "promptDrive.refreshEntry",
@@ -86,9 +90,14 @@
     "menus": {
       "view/item/context": [
         {
-          "command": "promptDrive.sendToCopilot",
+          "command": "promptDrive.sendToCopilotAskMode",
           "when": "view == promptDriveExplorer && viewItem == prompt",
-          "group": "inline"
+          "group": "copilot@1"
+        },
+        {
+          "command": "promptDrive.sendToCopilotAgentMode",
+          "when": "view == promptDriveExplorer && viewItem == prompt",
+          "group": "copilot@2"
         },
         {
           "command": "promptDrive.deleteEntry",

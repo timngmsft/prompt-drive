@@ -292,16 +292,31 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
-    // Command to send prompt content to Copilot
+    // Command to send prompt content to Copilot in Ask mode
     context.subscriptions.push(
-        vscode.commands.registerCommand('promptDrive.sendToCopilot', async (item: PromptDriveItem) => {
+        vscode.commands.registerCommand('promptDrive.sendToCopilotAskMode', async (item: PromptDriveItem) => {
             if (!item || item.isDirectory) {return;}
 
             try {
                 const content = fs.readFileSync(item.resourceUri.fsPath, 'utf8').trim();
-                await vscode.commands.executeCommand('workbench.action.chat.open', content);
+                await vscode.commands.executeCommand("workbench.action.chat.open", { query: content, mode: "ask" });
             } catch (error) {
-                vscode.window.showErrorMessage(`Failed to send to Copilot: ${error}`);
+                vscode.window.showErrorMessage(`Failed to send to Copilot Ask mode: ${error}`);
+            }
+        })
+    );
+
+    // Command to send prompt content to Copilot in Agent mode
+    context.subscriptions.push(
+        vscode.commands.registerCommand('promptDrive.sendToCopilotAgentMode', async (item: PromptDriveItem) => {
+            if (!item || item.isDirectory) {return;}
+
+            try {
+                const content = fs.readFileSync(item.resourceUri.fsPath, 'utf8').trim();
+                await vscode.commands.executeCommand("workbench.action.chat.openEditSession");
+                await vscode.commands.executeCommand("workbench.action.chat.newEditSession", { agentMode: true, inputValue: content });
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to send to Copilot Agent mode: ${error}`);
             }
         })
     );
