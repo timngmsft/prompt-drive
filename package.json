@@ -59,12 +59,22 @@
     },
     "commands": [
       {
-        "command": "promptDrive.sendToCopilotAskMode",
+        "command": "promptDrive.sendToCopilotAskModeFromTree",
         "title": "Send to Copilot (Ask Mode)"
       },
       {
-        "command": "promptDrive.sendToCopilotAgentMode",
+        "command": "promptDrive.sendToCopilotAgentModeFromTree",
         "title": "Send to Copilot (Agent Mode)"
+      },
+      {
+        "command": "promptDrive.sendToCopilotAskModeFromEditor",
+        "title": "Send to Copilot (Ask Mode)",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "promptDrive.sendToCopilotAgentModeFromEditor",
+        "title": "Send to Copilot (Agent Mode)",
+        "icon": "$(robot)"
       },
       {
         "command": "promptDrive.refreshEntry",
@@ -90,18 +100,30 @@
     "menus": {
       "view/item/context": [
         {
-          "command": "promptDrive.sendToCopilotAskMode",
+          "command": "promptDrive.sendToCopilotAskModeFromTree",
           "when": "view == promptDriveExplorer && viewItem == prompt",
           "group": "copilot@1"
         },
         {
-          "command": "promptDrive.sendToCopilotAgentMode",
+          "command": "promptDrive.sendToCopilotAgentModeFromTree",
           "when": "view == promptDriveExplorer && viewItem == prompt",
           "group": "copilot@2"
         },
         {
           "command": "promptDrive.deleteEntry",
           "when": "view == promptDriveExplorer"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "promptDrive.sendToCopilotAskModeFromEditor",
+          "when": "resourceExtname == .prompt",
+          "group": "navigation@1"
+        },
+        {
+          "command": "promptDrive.sendToCopilotAgentModeFromEditor",
+          "when": "resourceExtname == .prompt",
+          "group": "navigation@2"
         }
       ],
       "view/title": [
