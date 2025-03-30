@@ -292,16 +292,88 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
-    // Command to send prompt content to Copilot
+    // Command to send prompt content to Copilot in Ask mode from tree view
     context.subscriptions.push(
-        vscode.commands.registerCommand('promptDrive.sendToCopilot', async (item: PromptDriveItem) => {
-            if (!item || item.isDirectory) {return;}
-
+        vscode.commands.registerCommand('promptDrive.sendToCopilotAskModeFromTree', async (item: PromptDriveItem) => {
             try {
+                if (!item || item.isDirectory) {
+                    vscode.window.showErrorMessage('No prompt file selected');
+                    return;
+                }
+                
                 const content = fs.readFileSync(item.resourceUri.fsPath, 'utf8').trim();
-                await vscode.commands.executeCommand('workbench.action.chat.open', content);
+                await vscode.commands.executeCommand("workbench.action.chat.open", { query: content, mode: "ask" });
             } catch (error) {
-                vscode.window.showErrorMessage(`Failed to send to Copilot: ${error}`);
+                vscode.window.showErrorMessage(`Failed to send to Copilot Ask mode: ${error}`);
+            }
+        })
+    );
+
+    // Command to send prompt content to Copilot in Ask mode from editor
+    context.subscriptions.push(
+        vscode.commands.registerCommand('promptDrive.sendToCopilotAskModeFromEditor', async () => {
+            try {
+                const editor = vscode.window.activeTextEditor;
+                if (!editor) {
+                    vscode.window.showErrorMessage('No active editor found');
+                    return;
+                }
+                
+                const document = editor.document;
+                const filePath = document.fileName;
+                if (!filePath || !filePath.toLowerCase().endsWith('.prompt')) {
+                    vscode.window.showErrorMessage('The active file is not a .prompt file');
+                    return;
+                }
+                
+                const content = document.getText().trim();
+                await vscode.commands.executeCommand("workbench.action.chat.open", { query: content, mode: "ask" });
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to send to Copilot Ask mode: ${error}`);
+            }
+        })
+    );
+
+    // Command to send prompt content to Copilot in Agent mode from tree view
+    context.subscriptions.push(
+        vscode.commands.registerCommand('promptDrive.sendToCopilotAgentModeFromTree', async (item: PromptDriveItem) => {
+            try {
+                if (!item || item.isDirectory) {
+                    vscode.window.showErrorMessage('No prompt file selected');
+                    return;
+                }
+                
+                const content = fs.readFileSync(item.resourceUri.fsPath, 'utf8').trim();
+                await vscode.commands.executeCommand("workbench.action.chat.openEditSession");
+                await vscode.commands.executeCommand("workbench.action.chat.newEditSession", { agentMode: true, inputValue: content });
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to send to Copilot Agent mode: ${error}`);
+            }
+        })
+    );
+
+    // Command to send prompt content to Copilot in Agent mode from editor
+    context.subscriptions.push(
+        vscode.commands.registerCommand('promptDrive.sendToCopilotAgentModeFromEditor', async () => {
+            try {
+                const editor = vscode.window.activeTextEditor;
+                if (!editor) {
+                    vscode.window.showErrorMessage('No active editor found');
+                    return;
+                }
+                
+                const document = editor.document;
+                const filePath = document.fileName;
+                if (!filePath || !filePath.toLowerCase().endsWith('.prompt')) {
+                    vscode.window.showErrorMessage('The active file is not a .prompt file');
+                    return;
+                }
+                
+                const content = document.getText().trim();
+                await vscode.commands.executeCommand("workbench.action.chat.openEditSession");
+                await vscode.commands.executeCommand("workbench.action.chat.newEditSession", { agentMode: true, inputValue: content });
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to send to Copilot Agent mode: ${error}`);
             }
         })
     );
