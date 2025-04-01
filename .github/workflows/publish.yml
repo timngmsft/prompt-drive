@@ -8,6 +8,16 @@ on:
         required: true
         default: 'patch'
         type: 'string'
+      prerelease:
+        description: 'Is this a pre-release?'
+        required: true
+        default: false
+        type: 'boolean'
+      prerelease_id:
+        description: 'Pre-release identifier (e.g., alpha, beta, rc)'
+        required: false
+        default: 'beta'
+        type: 'string'
 
 jobs:
   publish:
@@ -27,10 +37,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: Update version
-        if: ${{ github.event.inputs.version == 'patch' || github.event.inputs.version == 'minor' || github.event.inputs.version == 'major' }}
+      # Handle standard version increments (patch, minor, major)
+      - name: Update version (standard)
+        if: ${{ !inputs.prerelease && (github.event.inputs.version == 'patch' || github.event.inputs.version == 'minor' || github.event.inputs.version == 'major') }}
         run: npm version ${{ github.event.inputs.version }} --no-git-tag-version
         
+      # Handle pre-release version increments (patch, minor, major)
+      - name: Update version (pre-release)
+        if: ${{ inputs.prerelease && (github.event.inputs.version == 'patch' || github.event.inputs.version == 'minor' || github.event.inputs.version == 'major') }}
+        run: npm version ${{ github.event.inputs.version }} --preid=${{ github.event.inputs.prerelease_id }} --no-git-tag-version --premajor --preminor --prepatch
+        
+      # Handle specific version strings
       - name: Set specific version
         if: ${{ github.event.inputs.version != 'patch' && github.event.inputs.version != 'minor' && github.event.inputs.version != 'major' }}
         run: |
@@ -59,7 +76,12 @@ jobs:
         run: vsce package
         
       - name: Publish Extension
+        if: ${{ !inputs.prerelease }}
         run: vsce publish -p ${{ secrets.VSCE_PAT }}
+        
+      - name: Publish Pre-release Extension
+        if: ${{ inputs.prerelease }}
+        run: vsce publish --pre-release -p ${{ secrets.VSCE_PAT }}
         
       # Extract version BEFORE using it in GitHub release
       - name: Extract version
@@ -73,7 +95,7 @@ jobs:
           name: Release v${{ steps.get-version.outputs.version }}
           generate_release_notes: true
           draft: false
-          prerelease: false
+          prerelease: ${{ inputs.prerelease }}
           files: "*.vsix"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

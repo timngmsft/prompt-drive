@@ -2,7 +2,10 @@
 
 All notable changes to the "PromptDrive" extension will be documented in this file.
 
-## [0.1.0] - 2024
+## [0.1.2] - 2025-03-31
+- Send to now supports the unified Ask / Edit / Agent experience
+
+## [0.1.0]
 
 - Initial release
 - Sidebar view with tree view for organizing prompt files
