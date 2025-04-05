@@ -2,6 +2,9 @@
 
 All notable changes to the "PromptDrive" extension will be documented in this file.
 
+## [0.1.3] - 2025-04-04
+- Support workspace folder as a prompt drive location
+
 ## [0.1.2] - 2025-03-31
 - Send to now supports the unified Ask / Edit / Agent experience
 
