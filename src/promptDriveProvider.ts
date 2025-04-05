@@ -84,13 +84,30 @@ export class PromptDriveTreeDataProvider implements vscode.TreeDataProvider<Prom
     private settings: PromptDriveSettings;
     private userBasePath: string;
     private repoBasePath: string | null = null;
+    private workspaceBasePath: string | null = null;
     private gitRepoRoot: string | null = null;
 
-    constructor(userBasePath: string, repoBasePath?: string, gitRepoRoot?: string) {
+    constructor(
+        gitRepoRoot: string | undefined,
+        userBasePath: string,
+        repoBasePath?: string, 
+        workspaceBasePath?: string
+    ) {
         this.settings = PromptDriveSettings.getInstance();
-        this.userBasePath = userBasePath;
-        this.repoBasePath = repoBasePath || null;
         this.gitRepoRoot = gitRepoRoot || null;
+        this.userBasePath = userBasePath;
+        
+        // Normalize drive letter case for consistency across paths
+        if (repoBasePath && /^[a-z]:/.test(repoBasePath)) {
+            repoBasePath = repoBasePath.charAt(0).toUpperCase() + repoBasePath.slice(1);
+        }
+        this.repoBasePath = repoBasePath || null;
+        
+        // Normalize drive letter case for workspace path as well
+        if (workspaceBasePath && /^[a-z]:/.test(workspaceBasePath)) {
+            workspaceBasePath = workspaceBasePath.charAt(0).toUpperCase() + workspaceBasePath.slice(1);
+        }
+        this.workspaceBasePath = workspaceBasePath || null;
         
         // Listen for settings changes
         vscode.workspace.onDidChangeConfiguration(e => {
@@ -108,9 +125,26 @@ export class PromptDriveTreeDataProvider implements vscode.TreeDataProvider<Prom
      * Update the repository path and git repository root
      * Called when workspace folders change
      */
-    updateRepositoryPath(repoPath?: string, gitRepoRoot?: string): void {
-        this.repoBasePath = repoPath || null;
+    updateRepositoryPath(gitRepoRoot?: string, repoPath?: string): void {
         this.gitRepoRoot = gitRepoRoot || null;
+        
+        // Normalize drive letter case for consistency across paths
+        if (repoPath && /^[a-z]:/.test(repoPath)) {
+            repoPath = repoPath.charAt(0).toUpperCase() + repoPath.slice(1);
+        }
+        this.repoBasePath = repoPath || null;
+    }
+
+    /**
+     * Update the workspace path
+     * Called when workspace folders change
+     */
+    updateWorkspacePath(workspacePath?: string): void {
+        // Normalize drive letter to match repoBasePath (uppercase)
+        if (workspacePath && /^[a-z]:/.test(workspacePath)) {
+            workspacePath = workspacePath.charAt(0).toUpperCase() + workspacePath.slice(1);
+        }
+        this.workspaceBasePath = workspacePath || null;
     }
 
     getTreeItem(element: PromptDriveItem): vscode.TreeItem {
@@ -119,7 +153,7 @@ export class PromptDriveTreeDataProvider implements vscode.TreeDataProvider<Prom
 
     async getChildren(element?: PromptDriveItem): Promise<PromptDriveItem[]> {
         if (!element) {
-            // Root level - add USER and REPOSITORY nodes
+            // Root level - add USER, REPOSITORY, and WORKSPACE nodes
             const rootNodes: PromptDriveItem[] = [];
             
             if (this.settings.enableUserPromptDrive && fs.existsSync(this.userBasePath)) {
@@ -129,6 +163,15 @@ export class PromptDriveTreeDataProvider implements vscode.TreeDataProvider<Prom
             // Only show REPOSITORY node if we're in a Git repository
             if (this.settings.useRepositoryPromptDrive && this.gitRepoRoot) {
                 rootNodes.push(new RootNode('REPOSITORY', this.repoBasePath!));
+            }
+            
+            // Only show WORKSPACE node if it exists and is different from repository prompt drive
+            if (this.workspaceBasePath && 
+                this.repoBasePath && this.workspaceBasePath !== this.repoBasePath) {
+                rootNodes.push(new RootNode('WORKSPACE', this.workspaceBasePath));
+            } else if (this.workspaceBasePath && !this.repoBasePath) {
+                // Also show WORKSPACE if repoBasePath doesn't exist
+                rootNodes.push(new RootNode('WORKSPACE', this.workspaceBasePath));
             }
             
             return rootNodes;
