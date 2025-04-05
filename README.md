@@ -3,16 +3,14 @@
 A Visual Studio Code extension for managing and sending prompts to Copilot. This extension allows you to save your favorite prompts in either:
 * Your home folder (~/.promptDrive)
 * Your repository's folder ([repoDir]/.promptDrive)
+* Your workspace folder ([workspaceFolder]/.promptDrive) - if this is the same as the repository folder, only repository is shown
 
 You can save prompts, manage them, edit them, and then send them to GitHub Copilot Chat / Edit.
 
 ## Features
 
-- Sidebar view in the primary side bar with a dedicated icon
-- Tree view for organizing prompt files in folders
-- Create, edit, and manage .prompt files
-- Send prompt content directly to Copilot with a right-click
-- File hover displays a summary of the prompt content
+- Managed and organize your prompts in the sidebar
+- Send prompts directly to Copilot
 
 ## Usage
 
@@ -27,8 +25,8 @@ You can save prompts, manage them, edit them, and then send them to GitHub Copil
 ### Sending Prompts to Copilot
 
 1. Right-click on a prompt file in the tree view
-2. Select "Send to Copilot" from the context menu
-3. The prompt content will be sent to the active Copilot Chat or Copilot Edits window
+2. Select "Send to Copilot" from the context menu. You can choose between "ask" and "agent" mode in Copilot.
+3. The prompt content will be sent to Copilot and executed in Copilot
 
 ## Storage
 
@@ -45,12 +43,3 @@ This extension provides the following settings:
 
 * `promptDrive.enableUserPromptDrive`: Enable user Prompt Drive ($HOME/.promptDrive)
 * `promptDrive.useRepositoryPromptDrive`: Use repository Prompt Drive if present
-
-## Release Notes
-
-### 0.1.0
-
-Initial release of PromptDrive:
-- Support for organizing and managing prompt files
-- Send prompts to Copilot
-- User and repository prompt storage options
