@@ -38,6 +38,19 @@ function findGitRepositoryRoot(folderPath: string): string | undefined {
 }
 
 /**
+ * Normalizes Windows drive letters to uppercase for path consistency
+ * @param filePath Path to normalize
+ * @returns Normalized path with uppercase drive letter
+ */
+function normalizeDriveLetter(filePath: string): string {
+    // Uppercase the drive letter if it's a Windows path
+    if (/^[a-z]:/.test(filePath)) {
+        return filePath.charAt(0).toUpperCase() + filePath.slice(1);
+    }
+    return filePath;
+}
+
+/**
  * Shows the README file when the extension is first installed
  * @param context Extension context
  */
@@ -97,21 +110,38 @@ export function activate(context: vscode.ExtensionContext) {
         fs.mkdirSync(USER_PROMPT_DRIVE_DIR, { recursive: true });
     }
 
-    // Find repository prompt drive path if a workspace is open
+    // Find repository prompt drive path and workspace prompt drive path if a workspace is open
     let repoPromptDriveDir: string | undefined = undefined;
     let repoRoot: string | undefined = undefined;
+    let workspacePromptDriveDir: string | undefined = undefined;
     
-    if (settings.useRepositoryPromptDrive && vscode.workspace.workspaceFolders?.length) {
+    if (vscode.workspace.workspaceFolders?.length) {
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-        repoRoot = findGitRepositoryRoot(workspaceRoot);
         
-        if (repoRoot) {
-            repoPromptDriveDir = path.join(repoRoot, '.promptDrive');
+        // Set up workspace prompt drive
+        workspacePromptDriveDir = path.join(workspaceRoot, '.promptDrive');
+        workspacePromptDriveDir = normalizeDriveLetter(workspacePromptDriveDir);
+        
+        // Set up repository prompt drive if enabled
+        if (settings.useRepositoryPromptDrive) {
+            repoRoot = findGitRepositoryRoot(workspaceRoot);
+            
+            if (repoRoot) {
+                repoRoot = normalizeDriveLetter(repoRoot);
+                repoPromptDriveDir = path.join(repoRoot, '.promptDrive');
+                repoPromptDriveDir = normalizeDriveLetter(repoPromptDriveDir);
+            }
         }
     }
 
     // Create the TreeDataProvider for the prompt drive view
-    const promptDriveProvider = new PromptDriveTreeDataProvider(USER_PROMPT_DRIVE_DIR, repoPromptDriveDir, repoRoot);
+    const promptDriveProvider = new PromptDriveTreeDataProvider(
+        repoRoot,
+        USER_PROMPT_DRIVE_DIR, 
+        repoPromptDriveDir, 
+        workspacePromptDriveDir
+    );
+    
     const treeView = vscode.window.createTreeView('promptDriveExplorer', {
         treeDataProvider: promptDriveProvider,
         showCollapseAll: true,
@@ -392,14 +422,28 @@ export function activate(context: vscode.ExtensionContext) {
     
     // Listen for workspace folder changes to update repository prompt drive
     vscode.workspace.onDidChangeWorkspaceFolders(() => {
+        let newWorkspacePromptDriveDir: string | undefined = undefined;
+        
+        // Update workspace path
+        if (vscode.workspace.workspaceFolders?.length) {
+            const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+            newWorkspacePromptDriveDir = path.join(workspaceRoot, '.promptDrive');
+            newWorkspacePromptDriveDir = normalizeDriveLetter(newWorkspacePromptDriveDir);
+            promptDriveProvider.updateWorkspacePath(newWorkspacePromptDriveDir);
+        } else {
+            promptDriveProvider.updateWorkspacePath(undefined);
+        }
+        
         // Update the repository root and repository path
         if (settings.useRepositoryPromptDrive && vscode.workspace.workspaceFolders?.length) {
             const workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
             repoRoot = findGitRepositoryRoot(workspaceRoot);
             
             if (repoRoot) {
+                repoRoot = normalizeDriveLetter(repoRoot);
                 repoPromptDriveDir = path.join(repoRoot, '.promptDrive');
-                promptDriveProvider.updateRepositoryPath(repoPromptDriveDir, repoRoot);
+                repoPromptDriveDir = normalizeDriveLetter(repoPromptDriveDir);
+                promptDriveProvider.updateRepositoryPath(repoRoot, repoPromptDriveDir);
             } else {
                 repoPromptDriveDir = undefined;
                 promptDriveProvider.updateRepositoryPath(undefined, undefined);
