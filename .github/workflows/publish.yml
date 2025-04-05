@@ -64,7 +64,11 @@ jobs:
             echo "Converting to $VERSION"
           fi
           
-          npm version $VERSION --no-git-tag-version --allow-same-version
+          if ${{ inputs.prerelease }}; then
+            npm version $VERSION --preid=${{ github.event.inputs.prerelease_id }} --no-git-tag-version --allow-same-version --prerelease
+          else
+            npm version $VERSION --no-git-tag-version --allow-same-version
+          fi
         
       - name: Install vsce
         run: npm install -g @vscode/vsce
